@@ -3,19 +3,30 @@ import Sketch from 'react-p5'
 import { useNavigate } from 'react-router'
 import { masterList } from '../Variables'
 
+/**
+ * Main Home page that also serves as landing.
+ * Lets users select a time period to explore.
+ * @returns 
+ */
 export default function HomePage() {
-
     const navigate = useNavigate()
 
+    // The full list of time periods to choose from
     const [timePeriods] = useState(masterList)
+
+    // Sets the initial viewing time period
     const [currentTimePeriod, setCurrentTimePeriod] = useState(masterList[0])
 
+    // Loading for animations on map handling
     const [isLoading, setIsLoading] = useState(false)
 
     return (
         <div id="home-page-container">
+            {/* Top Header intro */}
             <h1 className="main-title">A Timeline Experience</h1>
             <p className="sub-title">Made with ❤️ by Erol</p>
+
+            {/* Time period selections */}
             <section className="time-period-container">
                 <ul className="time-period-list">
                     {timePeriods.map((eachTimePeriod, index) => {
@@ -31,6 +42,7 @@ export default function HomePage() {
                 </ul>
             </section>
 
+            {/* Bulk bottom info on time period with map*/}
             <section id="main-time-period-info">
                 <h2 className="time-period-name">{currentTimePeriod.name} Period</h2>
                 <p className="time-period-period">{currentTimePeriod.period}</p>
@@ -39,6 +51,8 @@ export default function HomePage() {
                         <MapSketch
                             currentMapTitle={currentTimePeriod.name}
                             triggerAnimation={isLoading}
+
+                            // Redirects after animation finished
                             handleRedirect={() => navigate(`/ecosystem?time_period=${currentTimePeriod.name}`)}
                         />
                     </div>
@@ -51,14 +65,14 @@ export default function HomePage() {
 
                 </div>
 
+                {/* Initiates the map animation and redirects user*/}
                 <button
                     className="time-period-enter-bttn"
                     disabled={isLoading}
                     onClick={() => setIsLoading(true)}>{isLoading ? "Exploring..." : "Enter"}</button>
             </section>
 
-
-
+            {/* Citations */}
             <section className="citation-container">
                 <p className="citation-title">Sources from</p>
                 <ul className="citation-list">
@@ -73,20 +87,30 @@ export default function HomePage() {
     )
 }
 
+/**
+ * Map sketch with animation
+ * @returns 
+ */
 const MapSketch = ({ currentMapTitle, triggerAnimation, handleRedirect }) => {
+
+    // Selection of maps for each time period
     const [maps, setMaps] = useState([])
+    
+    // For not rerunnign animation once begun
     const [animationStarted, setAnimationStarted] = useState(false)
+
+    // The marker used in animation
     const [marker, setMarker] = useState(null)
 
+    // Times a bit of a delay after marker reaches destination
     const [timer, setTimer] = useState({ current: 0, delay: 120 })
 
-    function mapAnimation(p5) {
-    }
     return (
         <Sketch
-
             setup={(p5) => {
                 p5.createCanvas(document.getElementById("time-period-map").clientWidth, 600).parent("time-period-map")
+
+                // Loads in maps
                 setMaps([
                     p5.loadImage('./maps/devonian.jpeg'),
                     p5.loadImage('./maps/jurassic.jpeg'),
@@ -97,9 +121,8 @@ const MapSketch = ({ currentMapTitle, triggerAnimation, handleRedirect }) => {
                 p5.background("#85fffd")
                 p5.imageMode('corner')
 
+                // Based on viewing time period, renders the appropiate map with animation ready
                 let path = 0
-
-
                 if (currentMapTitle.toLowerCase() === "eocene") {
                     p5.image(maps[2], 0, 0, p5.width, p5.height)
                     if (p5.width !== maps[2].width) { p5.resizeCanvas(maps[2].width, maps[2].height) }
@@ -115,16 +138,19 @@ const MapSketch = ({ currentMapTitle, triggerAnimation, handleRedirect }) => {
                     if (p5.width !== maps[0].width) { p5.resizeCanvas(maps[0].width, maps[0].height) }
                     path = 2
                 }
-
-
+                
+                // Makes sure animation is not running in loop
                 if (animationStarted === false && triggerAnimation === true) {
                     setAnimationStarted(true)
-                    setMarker(new Marker(path))
+                    setMarker(new Marker(path)) // sets the marker for first init
                 }
 
+                // If marker is working, lets display it
                 if (!!marker) {
                     marker.display(p5)
-                    if (marker.finished) {
+                    if (marker.finished) { // once marker reaches final destination
+
+                        // Times the delay for the marker before redirecting
                         if (timer.current >= timer.delay) { handleRedirect() }
                         else { setTimer({ current: timer.current + 1, delay: timer.delay }) }
                     }
@@ -134,11 +160,15 @@ const MapSketch = ({ currentMapTitle, triggerAnimation, handleRedirect }) => {
     )
 }
 
+/**
+ * Marker used for the map animation
+ */
 class Marker {
     constructor(path) {
 
         this.speed = 2
 
+        // Based on the map displayed, create a path to follow
         if (path === 0) {
             this.coords = [
                 { x: 0, y: 200 },
@@ -168,13 +198,17 @@ class Marker {
         this.x = this.coords[0].x
         this.y = this.coords[0].y
 
+        // Current position in the coord list
         this.currentPos = -1
 
+        // Once the marker reaches its final destination
         this.finished = false
 
+        // Handles back trail
         this.trail = []
     }
 
+    // Creates the trail behind the marker for design
     makeTrail(p5) {
         this.trail.push({ x: this.x, y: this.y })
         for (var i = 0; i < this.trail.length; i++) {
@@ -184,8 +218,9 @@ class Marker {
         }
     }
 
+    // Moves the marker by detecting current pos and adjusting to next coord point
     move() {
-        // If at end dest
+        // If at end destination
         if (this.x === this.coords[this.coords.length - 1].x &&
             this.y === this.coords[this.coords.length - 1].y) {
             this.finished = true
@@ -209,26 +244,22 @@ class Marker {
             this.y -= this.speed
         }
 
+        // If marker has reached the next coord, move to following
         if (this.x === this.coords[this.currentPos + 1].x &&
             this.y === this.coords[this.currentPos + 1].y) {
             this.currentPos += 1
         }
     }
-    detectClick(p5) {
-        if (p5.dist(p5.mouseX, p5.mouseY, this.x, this.y) <= this.image.width / 20) {
-            this.changeBottomInfo(this.key, this.imagePath)
-        } else {
-            return false
-        }
-        return true
-    }
+
+    // Main display
     display(p5) {
         p5.noStroke()
         this.makeTrail(p5)
 
+        // Main Marker creation
         p5.fill('red')
         p5.ellipse(this.x, this.y, 18, 18)
-       
+
         this.move()
     }
 }
