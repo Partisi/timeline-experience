@@ -133,6 +133,15 @@ button:hover {
   margin-bottom: 24px;
 }
 
+.time-period-enter-bttn:disabled {
+  filter: brightness(80%);
+}
+
+.time-period-enter-bttn:disabled:hover {
+  filter: brightness(80%);
+  cursor: default;
+}
+
 .citation-container {
   background-color: #584B53;
   width: calc(100%);
@@ -209,15 +218,21 @@ a {
 }
 
 .center-talk-info {
-  display: flex;
-  flex-direction: row;
+  max-height: 700px;
+  overflow-y: scroll;
 }
+
 .he-speaks {
   color: #584B53;
+  text-align: right;
+}
+.viewing-animal-name {
+  text-align: right;
 }
 
 .center-talk-info>img {
   object-fit: contain;
+  float: left;
 }
 
 .the-dude-container>img {
@@ -234,7 +249,7 @@ a {
   background-color: #9D5C63;
   font-size: 24px;
   width: 42px;
-  
+
   height: 42px;
   border: 2px solid #584B53;
 }
@@ -271,6 +286,7 @@ a {
   border: 2px solid #584B53;
   border-radius: 50%;
 }
+
 .back-bttn {
   border: none;
   background-color: black;
@@ -279,4 +295,10 @@ a {
   width: 64px;
   height: 48px;
   border-radius: 12px;
+}
+
+#time-period-map {
+  display: flex;
+  align-items: center;
+
 }

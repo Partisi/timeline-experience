@@ -46,7 +46,7 @@ export default function EcosystemPage() {
                             <img src={viewingAnimal.profileImg} width={240} height="auto" />
                             <div>
                                 <p className="he-speaks">Mr. Pachycephalosaurus says...</p>
-                                <h2>{viewingAnimal.name}</h2>
+                                <h2 className="viewing-animal-name">{viewingAnimal.name}</h2>
                                 <p>{viewingAnimal.description}</p>
                             </div>
                         </div>
